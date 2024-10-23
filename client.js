@@ -13,7 +13,7 @@ client.connect(PORT, HOST, () => {
   const message = 'Hello';
   const buffer = Buffer.from(message);
 
-  const header = writeHeader(buffer.length, 10);
+  const header = writeHeader(buffer.length, 11);
   const packet = Buffer.concat([header, buffer]);
   client.write(packet);
 });
