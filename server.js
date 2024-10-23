@@ -1,6 +1,7 @@
 import net from 'net';
 import { readHeader, writeHeader } from './utils.js';
 import { HANDLER_ID, MAX_MESSAGE_LENGTH, TOTAL_LENGTH_SIZE } from './constants.js';
+import handlers from './handlers/index.js';
 
 const PORT = 5555;
 
@@ -20,12 +21,21 @@ const server = net.createServer((socket) => {
       return;
     }
 
+    const handler = handlers[handlerId];
+
+    if (!handler) {
+      console.error(`Error: No handler found for ID ${handlerId}`);
+      socket.write(`Error: Invalid handler ID ${handlerId}`);
+      socket.end();
+      return;
+    }
+
     const headerSize = TOTAL_LENGTH_SIZE + HANDLER_ID; // 6
     const message = buffer.slice(headerSize);
 
     console.log(`client 에게 받은 메세지: ${message}`);
 
-    const responseMessage = 'Hi!, There';
+    const responseMessage = handler(message);
     const responseBuffer = Buffer.from(responseMessage);
 
     const header = writeHeader(responseBuffer.length, handlerId);
