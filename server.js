@@ -1,6 +1,6 @@
 import net from 'net';
 import { readHeader, writeHeader } from './utils.js';
-import { HANDLER_ID, TOTAL_LENGTH_SIZE } from './constants.js';
+import { HANDLER_ID, MAX_MESSAGE_LENGTH, TOTAL_LENGTH_SIZE } from './constants.js';
 
 const PORT = 5555;
 
@@ -12,6 +12,13 @@ const server = net.createServer((socket) => {
     const { length, handlerId } = readHeader(buffer);
     console.log(`handlerId: ${handlerId}`);
     console.log(`length: ${length}`);
+
+    if (length > MAX_MESSAGE_LENGTH) {
+      console.error(`Error: Message length ${length}`);
+      socket.write(`Error: Message too long`);
+      socket.end();
+      return;
+    }
 
     const headerSize = TOTAL_LENGTH_SIZE + HANDLER_ID; // 6
     const message = buffer.slice(headerSize);
